@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 # Plot the performances from a file with the following format :
 #    |# first commented line
@@ -8,22 +8,26 @@
 #    |perf_trial1_iter1      perf_trial1_iter2      ... perf_trial1_iterM
 #    |perf_trial2_iter1      perf_trial2_iter2      ... perf_trial2_iterM
 #    |...                    ...                        ...
-#    |perf_trialN_iter1      perf_trialN_iter2      ... perf_trialN_iterM 
+#    |perf_trialN_iter1      perf_trialN_iter2      ... perf_trialN_iterM
 #
 # See for example jrl.examples.BenchmarkGARNET
 
 # TODO show the std dev
 
-from numpy import *
-from numpy.random import rand
-from numpy.linalg import norm
-from matplotlib import *
-from matplotlib.pyplot import *
-from numpy.core.fromnumeric import mean
+import sys
+import os
 
-nPerfFiles = (len(sys.argv)-1)/2
+# Use non-interactive backend if no display available
+if 'DISPLAY' not in os.environ:
+    import matplotlib
+    matplotlib.use('Agg')
+
+from numpy import empty, mean, std
+from matplotlib.pyplot import figure, subplot, xlabel, ylabel, errorbar, legend, show, savefig
+
+nPerfFiles = (len(sys.argv)-1)//2
 if len(sys.argv) < 3 or ((len(sys.argv)-1)%2) != 0:
-    print "Usage : plot_perf.py perf_title1 perf_filename1 [perf_title2 perf_filename2 ...]"
+    print("Usage : plot_perf.py perf_title1 perf_filename1 [perf_title2 perf_filename2 ...]")
 else:
     xlogscale = True # TODO should be an argument of the script
     fig = figure()
@@ -32,8 +36,8 @@ else:
     xlabel("Episodes")
     ylabel("Performance")
     legends = []
-    for k in xrange(nPerfFiles):
-        #print "- ",sys.argv[1+k*2]
+    for k in range(nPerfFiles):
+        #print("- ",sys.argv[1+k*2])
         legends.append(sys.argv[1+k*2])
         lines = open(sys.argv[2+k*2], 'r').readlines()
         # Remove commented lines
@@ -44,17 +48,22 @@ else:
         strNEpis = lines.pop(0).split(" ")
         nIters = len(strNEpis)
         nEpis = empty(nIters)
-        for i in xrange(nIters):
+        for i in range(nIters):
             nEpis[i] = float(strNEpis[i])
         # Now we can go through the perf of each trial and each iteration
         nTrials = len(lines)
         perf = empty((nTrials,nIters))
-        for i in xrange(nTrials):
+        for i in range(nTrials):
             sp = lines[i].split(" ")
-            for j in xrange(nIters):
+            for j in range(nIters):
                 perf[i,j] = float(sp[j])
         #plot(nEpis,mean(perf, axis=0))
         errorbar(nEpis,mean(perf, axis=0), yerr=std(perf, axis=0), label=sys.argv[1+k*2])
     #legend(legends,loc='best')
     legend(loc='best')
-    show()
+    # Save to file if running headless, otherwise show
+    if 'DISPLAY' not in os.environ:
+        savefig('performance_plot.png', dpi=150, bbox_inches='tight')
+        print("Plot saved to performance_plot.png")
+    else:
+        show()

@@ -1,0 +1,17 @@
+# Build output
+target/
+
+# IDE files
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
