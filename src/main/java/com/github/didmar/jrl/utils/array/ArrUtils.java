@@ -750,10 +750,16 @@ public final class ArrUtils {
 								   final double[] max) {
 		assert vec.length == min.length;
 		assert vec.length == max.length;
-		
-		return boundVector(vec,new double[][]{min,max});
+
+		// Build Nx2 bounds array where bounds[i] = {min[i], max[i]}
+		double[][] bounds = new double[vec.length][2];
+		for (int i = 0; i < vec.length; i++) {
+			bounds[i][0] = min[i];
+			bounds[i][1] = max[i];
+		}
+		return boundVector(vec, bounds);
 	}
-	
+
 	/**
 	* Bound each component of a vector between min or max.
 	* @param vec	the vector to be bounded.
@@ -764,7 +770,13 @@ public final class ArrUtils {
 	public static boolean boundVector(final double[] vec,
 								   	  double min, double max) {
 		assert min < max;
-		return boundVector(vec,new double[][]{{min},{max}});
+		// Build Nx2 bounds array where bounds[i] = {min, max}
+		double[][] bounds = new double[vec.length][2];
+		for (int i = 0; i < vec.length; i++) {
+			bounds[i][0] = min;
+			bounds[i][1] = max;
+		}
+		return boundVector(vec, bounds);
 	}
 		
 	
